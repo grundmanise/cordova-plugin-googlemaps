@@ -291,7 +291,7 @@ App.prototype._onCameraEvent = function(eventName, params) {
 App.prototype.getMap = function(div, params) {
      // Redraw the browser mandatory (especially for iOS)
     document.body.style.backgroundColor="rgba(0,0,0,0.1)";
-    
+
     var self = this,
         args = [];
 
@@ -638,6 +638,11 @@ App.prototype.setClickable = function(isClickable) {
 App.prototype.setBackgroundColor = function(color) {
     this.set('strokeColor', color);
     cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'pluginLayer_setBackGroundColor', [HTMLColor2RGBA(color)]);
+};
+
+App.prototype.setStyles = function(json_string) {
+    this.set('style', json_string);
+    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'pluginLayer_setStylesJSON', [{style: json_string}]);
 };
 
 

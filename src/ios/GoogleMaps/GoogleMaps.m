@@ -532,7 +532,7 @@
     // iOS8 or above
     direction = [UIDevice currentDevice].orientation;
 #endif
-   
+
    // On at least iOS 9.3.5, the screenSize.size changes on-orientation-change,
    // so we need to check if we really need to use the height as width and vice versa,
    // when in landscape mode.
@@ -766,6 +766,30 @@
 {
     NSArray *rgbColor = [command.arguments objectAtIndex:0];
     self.pluginLayer.backgroundColor = [rgbColor parsePluginColor];
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+/**
+ * Set JSON string of map styles
+ * @params key
+ */
+-(void)pluginLayer_setStylesJSON:(CDVInvokedUrlCommand *)command
+{
+    NSDictionary* options = [[NSDictionary alloc]init];
+    NSString* jsonStr;
+    if ([command.arguments count] > 0) {
+        options = [command argumentAtIndex:0];
+        jsonStr = [options objectForKey:@"style"];
+    }
+
+    NSError *error;
+    GMSMapStyle *style = [GMSMapStyle styleWithJSONString:jsonStr error:&error];
+    if (!style) {
+        NSLog(@"The style definition could not be loaded: %@", error);
+    }
+    self.mapCtrl.map.mapStyle = style;
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
