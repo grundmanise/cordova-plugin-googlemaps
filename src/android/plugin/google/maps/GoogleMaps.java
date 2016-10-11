@@ -2083,6 +2083,31 @@ public class GoogleMaps extends CordovaPlugin implements View.OnClickListener, O
     this.sendNoResult(callbackContext);
   }
 
+  // TODO: implement in java
+  // /**
+  //  * Set JSON string of map styles
+  //  * @params key
+  //  */
+  // -(void)pluginLayer_setStylesJSON:(CDVInvokedUrlCommand *)command
+  // {
+  //     NSDictionary* options = [[NSDictionary alloc]init];
+  //     NSString* jsonStr;
+  //     if ([command.arguments count] > 0) {
+  //         options = [command argumentAtIndex:0];
+  //         jsonStr = [options objectForKey:@"style"];
+  //     }
+
+  //     NSError *error;
+  //     GMSMapStyle *style = [GMSMapStyle styleWithJSONString:jsonStr error:&error];
+  //     if (!style) {
+  //         NSLog(@"The style definition could not be loaded: %@", error);
+  //     }
+  //     self.mapCtrl.map.mapStyle = style;
+
+  //     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
+  //     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+  // }
+
   /**
    * Set the debug flag of myPluginLayer
    * @param args

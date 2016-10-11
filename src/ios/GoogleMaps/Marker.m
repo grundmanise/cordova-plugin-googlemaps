@@ -7,6 +7,8 @@
 //
 
 #import "Marker.h"
+#import "MarkerAnimationDelegate.h"
+
 @implementation Marker
 -(void)setGoogleMapsViewController:(GoogleMapsViewController *)viewCtrl
 {
@@ -475,11 +477,98 @@
             [self setBounceAnimation_:marker pluginResult:pluginResult callbackId:callbackId];
             break;
         }
+        CASE (@"POPOUT") {
+            [self setPopoutAnimation_:marker pluginResult:pluginResult callbackId:callbackId];
+            break;
+        }
         DEFAULT {
             [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
             break;
         }
     }
+}
+
+/**
+ * set animation
+ * (memo) http://stackoverflow.com/a/19316475/697856
+ * (memo) http://qiita.com/edo_m18/items/4309d01b67ee42c35b3c
+ * (memo) http://stackoverflow.com/questions/12164049/animationdidstop-for-group-animation
+ */
+-(void)setPopoutAnimation_:(GMSMarker *)marker pluginResult:(CDVPluginResult *)pluginResult callbackId:(NSString*)callbackId {
+//    check the marker is visible
+    GMSVisibleRegion region = self.mapCtrl.map.projection.visibleRegion;
+    GMSCoordinateBounds *bounds = [[GMSCoordinateBounds alloc] initWithRegion:region];
+    if (![bounds containsCoordinate:marker.position]) {
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
+        return;
+    }
+    
+    
+    int duration = 1;
+
+    CAKeyframeAnimation *boundsOvershootAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform"];
+
+    CATransform3D startingScale = CATransform3DScale (marker.layer.transform, 0, 0, 0);
+    CATransform3D overshootScale = CATransform3DScale (marker.layer.transform, 1.2, 1.2, 1.0);
+    CATransform3D undershootScale = CATransform3DScale (marker.layer.transform, 0.9, 0.9, 1.0);
+    CATransform3D endingScale = marker.layer.transform;
+
+    NSArray *boundsValues = [NSArray arrayWithObjects:[NSValue valueWithCATransform3D:startingScale],
+                                                      [NSValue valueWithCATransform3D:overshootScale],
+                                                      [NSValue valueWithCATransform3D:undershootScale],
+                                                      [NSValue valueWithCATransform3D:endingScale], nil];
+    [boundsOvershootAnimation setValues:boundsValues];
+
+    NSArray *times = [NSArray arrayWithObjects:[NSNumber numberWithFloat:0.0f],
+                      [NSNumber numberWithFloat:0.5f*duration],
+                      [NSNumber numberWithFloat:0.9f*duration],
+                      [NSNumber numberWithFloat:1.0f*duration], nil];
+    [boundsOvershootAnimation setKeyTimes:times];
+
+    NSArray *timingFunctions = [NSArray arrayWithObjects:[CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseOut],
+                                [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut],
+                                [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut],
+                                nil];
+    [boundsOvershootAnimation setTimingFunctions:timingFunctions];
+    boundsOvershootAnimation.fillMode = kCAFillModeForwards;
+    boundsOvershootAnimation.removedOnCompletion = YES;
+    boundsOvershootAnimation.duration = duration;
+    
+    // we create imageview based on icon
+    // with the same position as icon
+    // and put animation on it
+    CGPoint point = [self.mapCtrl.map.projection pointForCoordinate:marker.position];
+    MarkerAnimationDelegate* delegate = [MarkerAnimationDelegate alloc];
+    delegate.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(
+        point.x - marker.icon.size.width/2,
+        point.y - marker.icon.size.height/2-2,
+        marker.icon.size.width,
+        marker.icon.size.height)];
+    
+    [delegate.imageView setClipsToBounds:YES];
+    [delegate.imageView setContentMode:UIViewContentModeBottom];
+    delegate.imageView.image = marker.icon;
+    [self.webView addSubview:delegate.imageView];
+    
+    
+//    MarkerAnimationDelegate* __weak weakDelegate = delegate;
+    delegate.onAnimationCompleted = ^{
+        marker.map = self.mapCtrl.map;
+//        [weakDelegate.imageView removeFromSuperview];
+//        remove image view after 1 frame delay
+        dispatch_time_t delay = dispatch_time(DISPATCH_TIME_NOW, NSEC_PER_SEC * 0.016);
+        dispatch_after(delay, dispatch_get_main_queue(), ^(void){
+            [delegate.imageView removeFromSuperview];
+            delegate.onAnimationCompleted = nil;
+        });
+    };
+    [boundsOvershootAnimation setDelegate:delegate];
+    
+    // hide the marker and start animation
+    marker.map = nil;
+    [delegate.imageView.layer addAnimation:boundsOvershootAnimation forKey:@"popoutAnim"];
+    
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
 }
 
 /**
@@ -528,6 +617,7 @@
     [marker.layer addAnimation:group forKey:@"dropMarkerAnim"];
 
 }
+
 -(void)setBounceAnimation_:(GMSMarker *)marker pluginResult:(CDVPluginResult *)pluginResult callbackId:(NSString*)callbackId
 {
     /**
@@ -699,7 +789,7 @@
                     #else
                         iconPath = [iconPath stringByReplacingOccurrencesOfString:@"file://" withString:@""];
                     #endif
-                    
+
                     NSFileManager *fileManager = [NSFileManager defaultManager];
                     if (![fileManager fileExistsAtPath:iconPath]) {
                         if (self.mapCtrl.debuggable) {
@@ -838,12 +928,12 @@
     } else if ([iconProperty valueForKey:@"iconColor"]) {
         UIColor *iconColor = [iconProperty valueForKey:@"iconColor"];
         marker.icon = [GMSMarker markerImageWithColor:iconColor];
-        
+
         // The `visible` property
         if ([[iconProperty valueForKey:@"visible"] boolValue]) {
             marker.map = self.mapCtrl.map;
         }
-        
+
         if (animation) {
             // Do animation, then send the result
             [self setMarkerAnimation_:animation marker:marker pluginResult:pluginResult callbackId:callbackId];

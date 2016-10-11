@@ -2650,7 +2650,8 @@ module.exports = {
     },
     Animation: {
         BOUNCE: 'BOUNCE',
-        DROP: 'DROP'
+        DROP: 'DROP',
+        POPOUT: 'POPOUT',
     },
 
     BaseClass: BaseClass,

@@ -167,6 +167,8 @@
         <source-file src="src/ios/GoogleMaps/Map.m" />
         <header-file src="src/ios/GoogleMaps/Marker.h" />
         <source-file src="src/ios/GoogleMaps/Marker.m" />
+        <header-file src="src/ios/GoogleMaps/MarkerAnimationDelegate.h" />
+        <source-file src="src/ios/GoogleMaps/MarkerAnimationDelegate.m" />
         <header-file src="src/ios/GoogleMaps/MyPlgunProtocol.h" />
         <header-file src="src/ios/GoogleMaps/PluginUtil.h" />
         <source-file src="src/ios/GoogleMaps/PluginUtil.m" />
