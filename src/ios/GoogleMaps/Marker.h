@@ -10,10 +10,15 @@
 #import "MyPlgunProtocol.h"
 #import "PluginUtil.h"
 #import "NSData+Base64.h"
+#import "GMUMarkerClustering.h"
 
-@interface Marker : CDVPlugin<MyPlgunProtocol>
+@interface Marker : CDVPlugin<MyPlgunProtocol, GMUClusterItem>
 @property (nonatomic, strong) GoogleMapsViewController* mapCtrl;
 - (void)createMarker:(CDVInvokedUrlCommand*)command;
+- (void)hideMarker:(CDVInvokedUrlCommand*)command;
+- (void)showMarker:(CDVInvokedUrlCommand*)command;
+- (void)hideMarkerForCode:(NSString*)hashCode;
+- (void)showMarkerForCode:(NSString*)hashCode;
 - (void)showInfoWindow:(CDVInvokedUrlCommand*)command;
 - (void)hideInfoWindow:(CDVInvokedUrlCommand*)command;
 - (void)isInfoWindowShown:(CDVInvokedUrlCommand*)command;
@@ -43,4 +48,8 @@
    pluginResult:(CDVPluginResult *)pluginResult
      callbackId:(NSString*)callbackId;
 
+@property(nonatomic, readonly, getter=clustering_getPosition) CLLocationCoordinate2D position;
+@property(nonatomic, readonly) NSString *name;
+
+- (Marker*)initWithPosition:(CLLocationCoordinate2D)position name:(NSString *)name;
 @end

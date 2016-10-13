@@ -159,6 +159,15 @@ App.prototype.updateCluster = function(callback) {
     }, self.errorHandler, PLUGIN_NAME, 'exec', ['GoogleMapsClusterViewController.updateCluster']);
 };
 
+App.prototype.startClustering = function(callback) {
+    var self = this;
+    cordova.exec(function(result) {
+        if (callback) {
+            callback();
+        };
+    }, self.errorHandler, PLUGIN_NAME, 'startClustering', [MARKERS]);
+}
+
 /*
  * Callback from Native
  */
@@ -1508,6 +1517,12 @@ Marker.prototype.setRotation = function(rotation) {
 };
 Marker.prototype.getRotation = function() {
     return this.get('rotation');
+};
+Marker.prototype.hideMarker = function() {
+    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', ['Marker.hideMarker', this.getId()]);
+};
+Marker.prototype.showMarker = function() {
+    cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', ['Marker.showMarker', this.getId()]);
 };
 Marker.prototype.showInfoWindow = function() {
     cordova.exec(null, this.errorHandler, PLUGIN_NAME, 'exec', ['Marker.showInfoWindow', this.getId()]);

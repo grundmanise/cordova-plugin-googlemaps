@@ -8,11 +8,49 @@
 
 #import "Marker.h"
 #import "MarkerAnimationDelegate.h"
+#import "GMUMarkerClustering.h"
 
 @implementation Marker
 -(void)setGoogleMapsViewController:(GoogleMapsViewController *)viewCtrl
 {
     self.mapCtrl = viewCtrl;
+}
+
+/**
+ * create marker with position
+ */
+- (Marker*)initWithPosition:(CLLocationCoordinate2D)position name:(NSString *)name
+{
+    self = [super init];
+    // NSDictionary *json = [command.arguments objectAtIndex:1];
+    // NSDictionary *latLng = [json objectForKey:@"position"];
+    // float latitude = [[latLng valueForKey:@"lat"] floatValue];
+    // float longitude = [[latLng valueForKey:@"lng"] floatValue];
+
+    // CLLocationCoordinate2D position = CLLocationCoordinate2DMake(latitude, longitude);
+    GMSMarker *marker = [GMSMarker markerWithPosition:position];
+    [marker setTitle:name];
+
+    NSString *id = [NSString stringWithFormat:@"marker_%lu", (unsigned long)marker.hash];
+    [self.mapCtrl.overlayManager setObject:marker forKey: id];
+
+    // Custom properties
+    NSMutableDictionary *properties = [[NSMutableDictionary alloc] init];
+    NSString *markerPropertyId = [NSString stringWithFormat:@"marker_property_%lu", (unsigned long)marker.hash];
+
+    BOOL disableAutoPan = NO;
+    [properties setObject:[NSNumber numberWithBool:disableAutoPan] forKey:@"disableAutoPan"];
+    [self.mapCtrl.overlayManager setObject:properties forKey:markerPropertyId];
+
+    NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
+    [result setObject:id forKey:@"id"];
+    [result setObject:[NSString stringWithFormat:@"%lu", (unsigned long)marker.hash] forKey:@"hashCode"];
+
+    marker.map = self.mapCtrl.map;
+//    CDVPluginResult* pluginResult = nil;
+//    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
+//    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    return self;
 }
 
 /**
@@ -134,6 +172,67 @@
             [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         }
     }
+}
+
+-(BOOL)showMarkerForCode:(NSString *)hashCode
+{
+    GMSMarker *marker = [self.mapCtrl.overlayManager objectForKey:hashCode];
+    if (marker) {
+        marker.map = self.mapCtrl.map;
+        return YES;
+    }
+    return NO;
+}
+
+-(BOOL)hideMarkerForCode:(NSString *)hashCode
+{
+    GMSMarker *marker = [self.mapCtrl.overlayManager objectForKey:hashCode];
+    if (marker) {
+        marker.map = nil;
+        return YES;
+    }
+    return NO;
+}
+
+
+/**
+ * Shows marker on map
+ * @params MarkerKey
+ */
+-(void)showMarker:(CDVInvokedUrlCommand *)command
+{
+    NSString *hashCode = [command.arguments objectAtIndex:1];
+
+    GMSMarker *marker = [self.mapCtrl.overlayManager objectForKey:hashCode];
+    if (marker) {
+        marker.map = self.mapCtrl.map;
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
+    }
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+/**
+ * Hides marker from map
+ * @params MarkerKey
+ */
+-(void)hideMarker:(CDVInvokedUrlCommand *)command
+{
+    NSString *hashCode = [command.arguments objectAtIndex:1];
+
+    GMSMarker *marker = [self.mapCtrl.overlayManager objectForKey:hashCode];
+    if (marker) {
+        marker.map = nil;
+        CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+        return;
+    }
+
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_NO_RESULT];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 /**
@@ -502,8 +601,8 @@
         [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
         return;
     }
-    
-    
+
+
     int duration = 1;
 
     CAKeyframeAnimation *boundsOvershootAnimation = [CAKeyframeAnimation animationWithKeyPath:@"transform"];
@@ -533,7 +632,7 @@
     boundsOvershootAnimation.fillMode = kCAFillModeForwards;
     boundsOvershootAnimation.removedOnCompletion = YES;
     boundsOvershootAnimation.duration = duration;
-    
+
     // we create imageview based on icon
     // with the same position as icon
     // and put animation on it
@@ -544,13 +643,13 @@
         point.y - marker.icon.size.height/2-2,
         marker.icon.size.width,
         marker.icon.size.height)];
-    
+
     [delegate.imageView setClipsToBounds:YES];
     [delegate.imageView setContentMode:UIViewContentModeBottom];
     delegate.imageView.image = marker.icon;
     [self.webView addSubview:delegate.imageView];
-    
-    
+
+
 //    MarkerAnimationDelegate* __weak weakDelegate = delegate;
     delegate.onAnimationCompleted = ^{
         marker.map = self.mapCtrl.map;
@@ -563,11 +662,11 @@
         });
     };
     [boundsOvershootAnimation setDelegate:delegate];
-    
+
     // hide the marker and start animation
     marker.map = nil;
     [delegate.imageView.layer addAnimation:boundsOvershootAnimation forKey:@"popoutAnim"];
-    
+
     [self.commandDelegate sendPluginResult:pluginResult callbackId:callbackId];
 }
 

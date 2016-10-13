@@ -167,6 +167,10 @@
         <source-file src="src/ios/GoogleMaps/Map.m" />
         <header-file src="src/ios/GoogleMaps/Marker.h" />
         <source-file src="src/ios/GoogleMaps/Marker.m" />
+        <header-file src="src/ios/GoogleMaps/MyClusterRenderer.h" />
+        <source-file src="src/ios/GoogleMaps/MyClusterRenderer.m" />
+        <header-file src="src/ios/GoogleMaps/MyClusterIconGenerator.h" />
+        <source-file src="src/ios/GoogleMaps/MyClusterIconGenerator.m" />
         <header-file src="src/ios/GoogleMaps/MarkerAnimationDelegate.h" />
         <source-file src="src/ios/GoogleMaps/MarkerAnimationDelegate.m" />
         <header-file src="src/ios/GoogleMaps/MyPlgunProtocol.h" />
@@ -193,6 +197,38 @@
         <source-file src="src/ios/GoogleMaps/MyPluginLayerDebugView.m" />
         <header-file src="src/ios/GoogleMaps/MyPluginScrollView.h" />
         <source-file src="src/ios/GoogleMaps/MyPluginScrollView.m" />
+        <header-file src="src/ios/Utils/QuadTree/GQTBounds.h" />
+        <source-file src="src/ios/Utils/QuadTree/GQTPointQuadTree.m" />
+        <header-file src="src/ios/Utils/QuadTree/GQTPointQuadTreeItem.h" />
+        <header-file src="src/ios/Utils/QuadTree/GQTPoint.h" />
+        <header-file src="src/ios/Utils/QuadTree/GQTPointQuadTreeChild.h" />
+        <header-file src="src/ios/Utils/QuadTree/GQTPointQuadTree.h" />
+        <source-file src="src/ios/Utils/QuadTree/GQTPointQuadTreeChild.m" />
+        <source-file src="src/ios/Utils/Clustering/GMUClusterManager.m" />
+        <header-file src="src/ios/Utils/Clustering/GMUCluster.h" />
+        <header-file src="src/ios/Utils/Clustering/GMUMarkerClustering.h" />
+        <header-file src="src/ios/Utils/Clustering/GMUClusterItem.h" />
+        <header-file src="src/ios/Utils/Clustering/GMUStaticCluster.h" />
+        <header-file src="src/ios/Utils/Clustering/GMUClusterManager+Testing.h" />
+        <source-file src="src/ios/Utils/Clustering/GMUStaticCluster.m" />
+        <header-file src="src/ios/Utils/Clustering/GMUClusterManager.h" />
+        <header-file src="src/ios/Utils/Clustering/Algo/GMUClusterAlgorithm.h" />
+        <header-file src="src/ios/Utils/Clustering/Algo/GMUGridBasedClusterAlgorithm.h" />
+        <source-file src="src/ios/Utils/Clustering/Algo/GMUGridBasedClusterAlgorithm.m" />
+        <header-file src="src/ios/Utils/Clustering/Algo/GMUNonHierarchicalDistanceBasedAlgorithm.h" />
+        <source-file src="src/ios/Utils/Clustering/Algo/GMUNonHierarchicalDistanceBasedAlgorithm.m" />
+        <header-file src="src/ios/Utils/Clustering/Algo/GMUSimpleClusterAlgorithm.h" />
+        <source-file src="src/ios/Utils/Clustering/Algo/GMUSimpleClusterAlgorithm.m" />
+        <header-file src="src/ios/Utils/Clustering/Algo/GMUWrappingDictionaryKey.h" />
+        <source-file src="src/ios/Utils/Clustering/Algo/GMUWrappingDictionaryKey.m" />
+        <header-file src="src/ios/Utils/Clustering/View/GMUClusterIconGenerator.h" />
+        <header-file src="src/ios/Utils/Clustering/View/GMUClusterRenderer.h" />
+        <header-file src="src/ios/Utils/Clustering/View/GMUDefaultClusterIconGenerator+Testing.h" />
+        <header-file src="src/ios/Utils/Clustering/View/GMUDefaultClusterIconGenerator.h" />
+        <source-file src="src/ios/Utils/Clustering/View/GMUDefaultClusterIconGenerator.m" />
+        <header-file src="src/ios/Utils/Clustering/View/GMUDefaultClusterRenderer+Testing.h" />
+        <header-file src="src/ios/Utils/Clustering/View/GMUDefaultClusterRenderer.h" />
+        <source-file src="src/ios/Utils/Clustering/View/GMUDefaultClusterRenderer.m" />
 
         <config-file target="*-Info.plist" parent="Google Maps API Key">
             <string>$API_KEY_FOR_IOS</string>

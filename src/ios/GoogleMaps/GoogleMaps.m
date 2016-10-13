@@ -7,8 +7,14 @@
 //
 
 #import "GoogleMaps.h"
+#import "GMUMarkerClustering.h"
+#import "Marker.h"
+#import "MyClusterRenderer.h"
+#import "MyClusterIconGenerator.h"
 
 @implementation GoogleMaps
+
+GMUClusterManager *_clusterManager;
 
 - (void)pluginInitialize
 {
@@ -714,6 +720,60 @@
     [self.mapCtrl.map clear];
 
     CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+}
+
+/**
+ * @brief      Starts a clustering.
+ *
+ * @param      command  The command from Cordova. First parameter should be markers list
+ */
+- (void)startClustering:(CDVInvokedUrlCommand*)command {
+    NSDictionary *markerIdsDict = [command.arguments objectAtIndex:0];
+    NSString *clusterImageBase64 = [command.arguments objectAtIndex:1];
+
+    NSData *decodedData;
+    UIImage *base64Image;
+    #ifdef __IPHONE_7_0
+      if ([PluginUtil isIOS7_OR_OVER]) {
+        decodedData = [[NSData alloc] initWithBase64Encoding:(NSString *)clusterImageBase64];
+      } else {
+        decodedData = [NSData dataFromBase64String:clusterImageBase64];
+      }
+    #else
+      decodedData = [NSData dataFromBase64String:clusterImageBase64];
+    #endif
+    base64Image = [[UIImage alloc] initWithData:decodedData];
+
+    NSArray<UIImage *>* backgroundImages = @[ base64Image ];
+    NSArray *markerIds = [markerIdsDict allKeys];
+    NSArray<NSNumber *>* buckets = @[ @100 ];
+    id<GMUClusterAlgorithm> algorithm =
+        [[GMUNonHierarchicalDistanceBasedAlgorithm alloc] init];
+    MyClusterIconGenerator * iconGenerator = [[MyClusterIconGenerator alloc] initWithBuckets:buckets backgroundImages:backgroundImages];
+    MyClusterRenderer* renderer =
+        [[MyClusterRenderer alloc] initWithMapView:self.mapCtrl.map
+                                    clusterIconGenerator:iconGenerator];
+    _clusterManager =
+        [[GMUClusterManager alloc] initWithMap:self.mapCtrl.map
+                                   algorithm:algorithm
+                                    renderer:renderer];
+
+    // get markers by id list and add them to cluster
+    for (NSString* key in self.mapCtrl.overlayManager) {
+        NSUInteger index = [markerIds indexOfObject:key];
+        if (index != NSNotFound) {
+            GMSMarker *marker = [self.mapCtrl.overlayManager objectForKey:key];
+            marker.map = nil;
+            [_clusterManager addItem:marker];
+        }
+    }
+
+    [_clusterManager cluster];
+    NSMutableDictionary *result = [[NSMutableDictionary alloc] init];
+    [result setObject:@"ok" forKey:@"status"];
+    CDVPluginResult* pluginResult = nil;
+    pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsDictionary:result];
     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
