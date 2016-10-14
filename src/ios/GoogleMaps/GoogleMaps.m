@@ -730,7 +730,8 @@ GMUClusterManager *_clusterManager;
  */
 - (void)startClustering:(CDVInvokedUrlCommand*)command {
     NSDictionary *markerIdsDict = [command.arguments objectAtIndex:0];
-    NSString *clusterImageBase64 = [command.arguments objectAtIndex:1];
+    NSDictionary *clusterStyle = [command.arguments objectAtIndex:1];
+    NSString *clusterImageBase64 = [clusterStyle objectForKey:@"img"];
 
     NSData *decodedData;
     UIImage *base64Image;
@@ -748,9 +749,14 @@ GMUClusterManager *_clusterManager;
     NSArray<UIImage *>* backgroundImages = @[ base64Image ];
     NSArray *markerIds = [markerIdsDict allKeys];
     NSArray<NSNumber *>* buckets = @[ @100 ];
+    NSArray<NSDictionary *>* styles = @[ clusterStyle ];
+    // NSArray<NSArray<NSNumber *>*>* imagesSizes = @[ @[ [clusterSize copy], [clusterSize copy]] ];
     id<GMUClusterAlgorithm> algorithm =
         [[GMUNonHierarchicalDistanceBasedAlgorithm alloc] init];
-    MyClusterIconGenerator * iconGenerator = [[MyClusterIconGenerator alloc] initWithBuckets:buckets backgroundImages:backgroundImages];
+    MyClusterIconGenerator * iconGenerator = [[MyClusterIconGenerator alloc]
+        initWithBuckets:buckets
+        backgroundImages:backgroundImages
+        clusterStyles:styles];
     MyClusterRenderer* renderer =
         [[MyClusterRenderer alloc] initWithMapView:self.mapCtrl.map
                                     clusterIconGenerator:iconGenerator];

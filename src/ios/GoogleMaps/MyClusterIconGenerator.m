@@ -32,6 +32,8 @@ static NSArray<UIColor *> *kGMUBucketBackgroundColors;
   NSCache *_iconCache;
   NSArray<NSNumber *> *_buckets;
   NSArray<UIImage *> *_backgroundImages;
+  NSArray<NSDictionary *> *_clusterStyles;
+  // NSArray<NSArray<NSNumber *> *> *_imageSizes;
 }
 
 + (void)initialize {
@@ -47,13 +49,14 @@ static NSArray<UIColor *> *kGMUBucketBackgroundColors;
 - (instancetype)init {
   if ((self = [super init]) != nil) {
     _iconCache = [[NSCache alloc] init];
-   _buckets = @[ @10, @50, @100, @200, @1000 ];
+    _buckets = @[ @10, @50, @100, @200, @1000 ];
   }
   return self;
 }
 
 - (instancetype)initWithBuckets:(NSArray<NSNumber *> *)buckets
-               backgroundImages:(NSArray<UIImage *> *)backgroundImages {
+               backgroundImages:(NSArray<UIImage *> *)backgroundImages
+               clusterStyles:(NSArray<NSDictionary *> *)clusterStyles {
   if ((self = [self initWithBuckets:buckets]) != nil) {
     if (buckets.count != backgroundImages.count) {
       [NSException raise:NSInvalidArgumentException
@@ -62,6 +65,8 @@ static NSArray<UIColor *> *kGMUBucketBackgroundColors;
     }
 
     _backgroundImages = [backgroundImages copy];
+    // _imageSizes = [imageSizes copy];
+    _clusterStyles = [clusterStyles copy];
   }
   return self;
 }
@@ -101,7 +106,9 @@ static NSArray<UIColor *> *kGMUBucketBackgroundColors;
   }
   if (_backgroundImages != nil) {
     UIImage *image = _backgroundImages[bucketIndex];
-    return [self iconForText:text withBaseImage:image];
+    // NSArray<NSNumber *> *imageSize = _imageSizes[bucketIndex];
+    NSDictionary *clusterStyle = _clusterStyles[bucketIndex];
+    return [self iconForText:text withBaseImage:image withParams:clusterStyle];
   }
   return [self iconForText:text withBucketIndex:bucketIndex];
 }
@@ -118,24 +125,32 @@ static NSArray<UIColor *> *kGMUBucketBackgroundColors;
   return index;
 }
 
-- (UIImage *)iconForText:(NSString *)text withBaseImage:(UIImage *)image {
+- (UIImage *)iconForText:(NSString *)text
+          withBaseImage:(UIImage *)image
+          withParams:(NSDictionary *)dict
+           {
   UIImage *icon = [_iconCache objectForKey:text];
   if (icon != nil) {
     return icon;
   }
 
-  UIFont *font = [UIFont boldSystemFontOfSize:12];
-  CGSize size = image.size;
+  NSNumber * imageSize = [dict objectForKey:@"size"];
+  NSNumber * fontSize = [dict objectForKey:@"fontSize"];
+  UIColor * textColor = [self colorFromHexString:[dict objectForKey:@"textColor"]];
+  CGFloat floatImageSize = [imageSize floatValue];
+
+  UIFont *font = [UIFont boldSystemFontOfSize:[fontSize floatValue]];
+  CGSize size = CGSizeMake(floatImageSize, floatImageSize);
   UIGraphicsBeginImageContextWithOptions(size, NO, 0.0f);
   [image drawInRect:CGRectMake(0, 0, size.width, size.height)];
-  CGRect rect = CGRectMake(0, 0, image.size.width, image.size.height);
+  CGRect rect = CGRectMake(0, 0, floatImageSize, floatImageSize);
 
   NSMutableParagraphStyle *paragraphStyle = [[NSParagraphStyle defaultParagraphStyle] mutableCopy];
   paragraphStyle.alignment = NSTextAlignmentCenter;
   NSDictionary *attributes = @{
     NSFontAttributeName : font,
     NSParagraphStyleAttributeName : paragraphStyle,
-    NSForegroundColorAttributeName : [UIColor whiteColor]
+    NSForegroundColorAttributeName : textColor
   };
   CGSize textSize = [text sizeWithAttributes:attributes];
   CGRect textRect = CGRectInset(rect, (rect.size.width - textSize.width) / 2,
@@ -191,6 +206,14 @@ static NSArray<UIColor *> *kGMUBucketBackgroundColors;
 
   [_iconCache setObject:newImage forKey:text];
   return newImage;
+}
+
+- (UIColor *)colorFromHexString:(NSString *)hexString {
+    unsigned rgbValue = 0;
+    NSScanner *scanner = [NSScanner scannerWithString:hexString];
+    [scanner setScanLocation:1]; // bypass '#' character
+    [scanner scanHexInt:&rgbValue];
+    return [UIColor colorWithRed:((rgbValue & 0xFF0000) >> 16)/255.0 green:((rgbValue & 0xFF00) >> 8)/255.0 blue:(rgbValue & 0xFF)/255.0 alpha:1.0];
 }
 
 @end

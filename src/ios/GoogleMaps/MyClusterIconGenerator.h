@@ -47,7 +47,8 @@ NS_ASSUME_NONNULL_BEGIN
  * - |buckets| and |backgroundImages| must have equal non zero lengths.
  */
 - (instancetype)initWithBuckets:(NSArray<NSNumber *> *)buckets
-               backgroundImages:(NSArray<UIImage *> *)backgroundImages;
+               backgroundImages:(NSArray<UIImage *> *)backgroundImages
+               clusterStyles:(NSArray<NSDictionary *> *)clusterStyles;
 
 /**
  * Generates an icon with the given size.

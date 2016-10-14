@@ -159,13 +159,19 @@ App.prototype.updateCluster = function(callback) {
     }, self.errorHandler, PLUGIN_NAME, 'exec', ['GoogleMapsClusterViewController.updateCluster']);
 };
 
-App.prototype.startClustering = function(callback) {
+App.prototype.startClustering = function(clusterStyle, callback) {
     var self = this;
+    if (!clusterStyle.size)
+        clusterStyle.size = 100;
+    if (!clusterStyle.fontSize)
+        clusterStyle.fontSize = 15;
+    if (!clusterStyle.textColor)
+        clusterStyle.textColor = '#ffffff';
     cordova.exec(function(result) {
         if (callback) {
             callback();
         };
-    }, self.errorHandler, PLUGIN_NAME, 'startClustering', [MARKERS]);
+    }, self.errorHandler, PLUGIN_NAME, 'startClustering', [MARKERS, clusterStyle]);
 }
 
 /*
