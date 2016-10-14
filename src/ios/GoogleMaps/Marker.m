@@ -928,7 +928,7 @@
             if (iconProperty[@"visible"]) {
                 marker.map = self.mapCtrl.map;
             }
-
+            
             if (animation) {
                 // Do animation, then send the result
                 [self setMarkerAnimation_:animation marker:marker pluginResult:pluginResult callbackId:callbackId];
