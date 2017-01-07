@@ -40,10 +40,10 @@ NSDictionary *initOptions;
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    self.view.backgroundColor = [[NSArray arrayWithObjects:[NSNumber numberWithInt:128],
-                                                            [NSNumber numberWithInt:128],
-                                                            [NSNumber numberWithInt:128],
-                                                            [NSNumber numberWithInt:128], nil] parsePluginColor];
+    self.view.backgroundColor = [[NSArray arrayWithObjects:[NSNumber numberWithInt:0],
+                                                            [NSNumber numberWithInt:0],
+                                                            [NSNumber numberWithInt:0],
+                                                            [NSNumber numberWithInt:0], nil] parsePluginColor];
   
     //------------
     // Initialize
